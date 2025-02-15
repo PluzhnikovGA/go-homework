@@ -1,33 +1,77 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"slices"
+	"strings"
 )
 
 func main() {
+	currencyList := []string{"USD", "RUB", "EUR"}
+
 	fmt.Print("__ Currency conversion __\n")
 
-	amount, yourCurrency, currencyToConvert := inputData()
+	yourCurrency, amount, currencyToConvert := inputData(currencyList)
 
 	result := convertMoney(amount, yourCurrency, currencyToConvert)
 
-	fmt.Printf("You get %.2f %s", result, currencyToConvert)
+	fmt.Printf("You'll get %.2f %s", result, currencyToConvert)
 }
 
-func inputData() (amount float64, yourCurrency string, currencyToConvert string){
-	fmt.Print("Enter the amount of money you want to convert: ")
-	fmt.Scan(&amount)
-	fmt.Print("What currency do you have money in: ")
-	fmt.Scan(&yourCurrency)
-	fmt.Print("What currency do you want to convert your money into: ")
-	fmt.Scan(&currencyToConvert)
+var currencyRates = map[string]map[string]float64{
+	"USD": {"EUR": 0.95, "RUB": 91.07},
+	"EUR": {"USD": 1.05, "RUB": 95.61},
+	"RUB": {"USD": 0.011, "EUR": 0.01},
+}
 
-	return
+func inputData(currencyList []string) (yourCurrency string, amount float64, currencyToConvert string){
+	yourCurrency, currencyList = choiceCurrent(currencyList, "What currency do you have money in")
+
+	amount = getAmount()
+
+	currencyToConvert, _ = choiceCurrent(currencyList, "What currency do you want to convert your money into")
+
+	return yourCurrency, amount, currencyToConvert
 }
 
 func convertMoney(amount float64, yourCurrency string, currencyToConvert string) (result float64) {
-	const USD_IN_EUR = 0.95
-	const USD_IN_RUB = 91.75
-	
-	return 
+	if rates, ok := currencyRates[yourCurrency]; ok {
+			if rate, ok := rates[currencyToConvert]; ok {
+					return amount * rate
+			}
+	}
+	return amount
+}
+
+func choiceCurrent(currencyList []string, text string) (currency string, newCurrencyList []string) {
+	currencyListStr := strings.Join(currencyList, ", ")
+	fmt.Printf("%s [%s]: ", text, currencyListStr)
+
+	for {
+		reader := bufio.NewReader(os.Stdin)
+		input, _ := reader.ReadString('\n')
+		input = strings.ToUpper(strings.TrimSpace(input))
+
+		currencyIndex := slices.Index(currencyList, input)
+
+		if currencyIndex >= 0 {
+			currencyList = append(currencyList[:currencyIndex], currencyList[currencyIndex+1:]...)
+			return input, currencyList
+		}
+
+		fmt.Printf("You need to choice currency from this list [%s]: ", currencyListStr)
+	}
+}
+
+func getAmount() (amount float64) {
+	fmt.Print("Enter the amount of money you want to convert: ")
+	for {
+		_, err := fmt.Scan(&amount)
+		if amount > 0 && err == nil {
+			return amount
+		}
+		fmt.Print("You entered an incorrect amount, please repeat: ")
+	}
 }
