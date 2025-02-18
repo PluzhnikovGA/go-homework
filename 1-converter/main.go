@@ -10,10 +10,11 @@ import (
 
 func main() {
 	currencyList := []string{"USD", "RUB", "EUR"}
+	reader := bufio.NewReader(os.Stdin)
 
 	fmt.Print("__ Currency conversion __\n")
 
-	yourCurrency, amount, currencyToConvert := inputData(currencyList)
+	yourCurrency, amount, currencyToConvert := inputData(currencyList, reader)
 
 	result := convertMoney(amount, yourCurrency, currencyToConvert)
 
@@ -26,12 +27,12 @@ var currencyRates = map[string]map[string]float64{
 	"RUB": {"USD": 0.011, "EUR": 0.01},
 }
 
-func inputData(currencyList []string) (yourCurrency string, amount float64, currencyToConvert string){
-	yourCurrency, currencyList = choiceCurrent(currencyList, "What currency do you have money in")
+func inputData(currencyList []string, reader *bufio.Reader) (yourCurrency string, amount float64, currencyToConvert string){
+	yourCurrency, currencyList = choiceCurrent(currencyList, "What currency do you have money in", reader)
 
 	amount = getAmount()
 
-	currencyToConvert, _ = choiceCurrent(currencyList, "What currency do you want to convert your money into")
+	currencyToConvert, _ = choiceCurrent(currencyList, "What currency do you want to convert your money into", reader)
 
 	return yourCurrency, amount, currencyToConvert
 }
@@ -45,12 +46,11 @@ func convertMoney(amount float64, yourCurrency string, currencyToConvert string)
 	return amount
 }
 
-func choiceCurrent(currencyList []string, text string) (currency string, newCurrencyList []string) {
+func choiceCurrent(currencyList []string, text string, reader *bufio.Reader) (currency string, newCurrencyList []string) {
 	currencyListStr := strings.Join(currencyList, ", ")
 	fmt.Printf("%s [%s]: ", text, currencyListStr)
 
 	for {
-		reader := bufio.NewReader(os.Stdin)
 		input, _ := reader.ReadString('\n')
 		input = strings.ToUpper(strings.TrimSpace(input))
 
