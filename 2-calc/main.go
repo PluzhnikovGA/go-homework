@@ -16,8 +16,6 @@ func main() {
 
 	method := getMethod(reader)
 
-	fmt.Print(method)
-
 	numbers := getNumbersList(reader)
 
 	switch {
