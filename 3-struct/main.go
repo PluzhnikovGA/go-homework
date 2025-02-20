@@ -1,20 +1,21 @@
 package main
 
 import (
-	"3-struct/bins"
-	"bufio"
+	"3-struct/storage"
 	"fmt"
-	"os"
 )
 
 func main() {
-	reader := bufio.NewReader(os.Stdin)
+	data, _ := storage.ReadBins()
 
-	var binList bins.BinList
-	binList.NewListBin(reader)
+	fmt.Print(data)
+	// reader := bufio.NewReader(os.Stdin)
 
-	fmt.Println("\nCreated bins:")
-	for _, bin := range binList.Bins {
-		fmt.Printf("ID: %s, Name: %s, CreatedAt: %s Private: %t \n", bin.Id, bin.Name, bin.CreatedAt, bin.Private)
-	}
+	// var binList bins.BinList
+	// binList.NewListBin(reader)
+
+	// fmt.Println("\nCreated bins:")
+	// for _, bin := range binList.Bins {
+	// 	fmt.Printf("ID: %s, Name: %s, CreatedAt: %s Private: %t \n", bin.Id, bin.Name, bin.CreatedAt, bin.Private)
+	// }
 }
