@@ -10,24 +10,21 @@ import (
 	"strings"
 )
 
+
+
 func main() {
 	reader := bufio.NewReader(os.Stdin)
-	var result float64
-
 	method := getMethod(reader)
-
-	fmt.Print(method)
 
 	numbers := getNumbersList(reader)
 
-	switch {
-	case method == "AVG":
-		result = averageAllNumbers(numbers)
-	case method == "SUM":
-		result = summaAllNumbers(numbers)
-	default:
-		result = medianAllNumbers(numbers)
+	var calculations = map[string]func() float64{
+		"AVG": func() float64 { return averageAllNumbers(numbers) },
+		"SUM": func() float64 { return summaAllNumbers(numbers) },
+		"MED": func() float64 { return medianAllNumbers(numbers) },
 	}
+
+	result := calculations[method]()
 
 	fmt.Printf("You chose '%s' and got the result: %.5f", method, result)
 }
