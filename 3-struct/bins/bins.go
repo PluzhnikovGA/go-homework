@@ -51,18 +51,21 @@ type BinList struct {
 	Bins []Bin `json:"bins"`
 }
 
-func (binList *BinList) AddBin(reader *bufio.Reader) {
+type BinListWithStore struct {
+	BinList
+	Store storage.Storage
+}
+
+func (binList *BinListWithStore) AddBin(reader *bufio.Reader) {
 	bin := newBin(reader)
 
 	binList.Bins = append(binList.Bins, *bin)
 
-	storage.SaveBinList(json.MarshalIndent(binList, "", "  "))
+	binList.Store.Save(json.MarshalIndent(binList, "", "  "))
 }
 
-func NewBinList(reader *bufio.Reader) (*BinList) {
-	fmt.Println("__ Create BinList __")
-
-	data, err := storage.ReadBins()
+func NewBinList(reader *bufio.Reader, store *storage.StorageDb) (*BinListWithStore) {
+	data, err := store.Read()
 
 	if err != nil {
 		fmt.Println("Error! Something went wrong, please try again.")
@@ -74,10 +77,15 @@ func NewBinList(reader *bufio.Reader) (*BinList) {
 
 	if err != nil {
 		fmt.Printf("Couldn't parse data from the file")
-		return &BinList{
-			Bins: []Bin{},
+		return &BinListWithStore{
+			BinList: BinList{
+				Bins: []Bin{},},
+			Store: store,
 		}
 	}
 
-	return &binList
+	return &BinListWithStore{
+		BinList: binList,
+		Store: store,
+	}
 }
