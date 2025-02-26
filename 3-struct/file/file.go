@@ -6,14 +6,8 @@ import (
 	"path/filepath"
 )
 
-const EXT = ".json"
-
-func ReadFile(name string) (data []byte, err error) {
-	return os.ReadFile(name);
-}
-
-func ValidationJSONExtension(name string) (isJson bool) {
-	return filepath.Ext(name) == EXT
+func ReadFile(filename string) (data []byte, err error) {
+	return os.ReadFile(filename);
 }
 
 func WriteFile(content []byte, name string) {
@@ -34,4 +28,8 @@ func WriteFile(content []byte, name string) {
 	}
 
 	fmt.Println("Recording completed successfully!")
+}
+
+func ValidationJSONExtension(name string) (isJson bool) {
+	return filepath.Ext(name) == ".json"
 }

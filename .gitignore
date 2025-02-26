@@ -2,3 +2,5 @@
 
 demo*
 *.json
+*.vault
+*/.env*
