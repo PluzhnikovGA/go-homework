@@ -3,40 +3,57 @@ package main
 import (
 	"3-struct/bins"
 	"3-struct/storage"
-	"bufio"
+	"flag"
 	"fmt"
 	"os"
-	"strings"
 )
 
 func main() {
-	reader := bufio.NewReader(os.Stdin)
-	binList := bins.NewBinList(reader, storage.NewStorageDb("data.json"))
+	create := flag.Bool("create", false, "Create bin")
+	update := flag.Bool("update", false, "Update bin")
+	delete := flag.Bool("delete", false, "Delete bin")
+	get := flag.Bool("get", false, "Get bin")
+	list := flag.Bool("list", false, "Bins list")
 
-	for {
-		fmt.Print("Do you want to add new bin? (Y/n): ")
-		input, err := reader.ReadString('\n')
+	file := flag.String("file", "", "File name")
+	name := flag.String("name", "", "Bin name")
+	id := flag.String("id", "", "Bin id")
 
-		if err != nil {
-			fmt.Println("Something went wrong.")
-			continue
-		}
+	flag.Parse()
 
-		switch strings.ToUpper(strings.TrimSpace(input)) {
-		case "Y", "":
-			binList.AddBin(reader)
-			data, err := binList.Store.Read()
-
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-
-			fmt.Println(string(data))
-		case "N":
-			fmt.Println("Good bye!")
-		default:
-			fmt.Println("You entered an incorrect value.")
-		}
+	if *file == "" {
+		fmt.Println("Error! You need to write file name.")
+		os.Exit(1)
 	}
+	binList := bins.NewBinList(storage.NewStorageDb(*file))
+
+	switch {
+	case *create:
+		requireValue(name, "bin name")
+		binList.AddBin(*name)
+	case *update:
+		requireValue(id, "bin id")
+		binList.Update(*id)
+	case *delete:
+		requireValue(id, "bin id")
+		binList.Delete(*id)
+	case *get:
+		requireValue(id, "bin id")
+		binList.Get(*id)
+	case *list:
+		binList.GetList()
+	default:
+		exitWithError(fmt.Sprintln("Error! You need to write a command."))
+	}
+}
+
+func requireValue(value *string, name string) {
+	if *value == "" {
+		exitWithError(fmt.Sprintf("Error! You need to write %s.", name))
+	}
+}
+
+func exitWithError(msg string) {
+	fmt.Println(msg)
+	os.Exit(1)
 }

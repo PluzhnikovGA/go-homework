@@ -2,10 +2,8 @@ package bins
 
 import (
 	"3-struct/storage"
-	"bufio"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 )
 
@@ -16,30 +14,10 @@ type Bin struct {
 	Name string `json:"name"`
 }
 
-func newBin(reader *bufio.Reader) (*Bin){
+func newBin(name string) (*Bin){
 	var bin Bin
-	fmt.Println("__ Create Bin __")
 
-	fmt.Print("Enter a new name of Bin: ")
-	for {
-		input, err := reader.ReadString('\n')
-
-		if err != nil {
-			fmt.Println("Error! Enter a new name of Bin: ")
-			continue
-		}
-
-		input = strings.TrimSpace(input)
-
-		if input == "" {
-			fmt.Println("Error! Enter a valid name of Bin: ")
-			continue
-		}
-
-		bin.Name = input
-		break
-	}
-
+	bin.Name = name
 	bin.CreatedAt = time.Now()
 	bin.Private = false
 	bin.Id = fmt.Sprintf("bin-%d", time.Now().Unix())
@@ -56,15 +34,64 @@ type BinListWithStore struct {
 	Store storage.Storage
 }
 
-func (binList *BinListWithStore) AddBin(reader *bufio.Reader) {
-	bin := newBin(reader)
+func (binList *BinListWithStore) AddBin(name string) {
+	binList.Bins = append(binList.Bins, *newBin(name))
 
-	binList.Bins = append(binList.Bins, *bin)
-
-	binList.Store.Save(json.MarshalIndent(binList, "", "  "))
+	binList.save(binList.Bins)
 }
 
-func NewBinList(reader *bufio.Reader, store *storage.StorageDb) (*BinListWithStore) {
+func (binList *BinListWithStore) Update(id string) {
+	for index := range binList.Bins {
+		if binList.Bins[index].Id == id {
+			binList.Bins[index].CreatedAt = time.Now()
+			binList.save(binList.Bins)
+			fmt.Printf("Bin with id: %s was updated\n", id)
+			return
+		}
+	}
+
+	fmt.Printf("Bin list don't have bin with id: %s", id)
+}
+
+func (binList *BinListWithStore) Delete(id string) {
+	for index := range binList.Bins {
+		if binList.Bins[index].Id == id {
+			binList.Bins = append(binList.Bins[:index], binList.Bins[index+1:]...)
+			binList.save(binList.Bins)
+			fmt.Printf("Bin with id: %s was deleted", id)
+			return
+		}
+	}
+
+	fmt.Printf("Bin list don't have bin with id: %s", id)
+}
+
+func (binList *BinListWithStore) Get(id string) {
+	for _, bin := range binList.Bins {
+		if bin.Id == id {
+			fmt.Printf("id: %s\n", bin.Id)
+			fmt.Printf("name: %s\n", bin.Name)
+			fmt.Printf("private: %t\n", bin.Private)
+			fmt.Printf("createdAt: %s\n", bin.CreatedAt)
+			return
+		}
+	}
+
+	fmt.Printf("Bin list don't have bin with id: %s", id)
+}
+
+func (binList *BinListWithStore) GetList() {
+	if len(binList.Bins) == 0 {
+		fmt.Println("Bin list is empty.")
+		return
+	}
+
+	for _, bin := range binList.Bins {
+		fmt.Printf("id: %s, name: %s\n", bin.Id, bin.Name)
+	}
+}
+
+func NewBinList(store *storage.StorageDb) (*BinListWithStore) {
 	data, err := store.Read()
 
 	if err != nil {
@@ -72,8 +99,8 @@ func NewBinList(reader *bufio.Reader, store *storage.StorageDb) (*BinListWithSto
 		return nil
 	}
 
-	var binList BinList
-	err = json.Unmarshal(data, &binList)
+	var bins BinList
+	err = json.Unmarshal(data, &bins)
 
 	if err != nil {
 		fmt.Printf("Couldn't parse data from the file")
@@ -85,7 +112,15 @@ func NewBinList(reader *bufio.Reader, store *storage.StorageDb) (*BinListWithSto
 	}
 
 	return &BinListWithStore{
-		BinList: binList,
+		BinList: bins,
 		Store: store,
 	}
+}
+
+func (binList *BinListWithStore) save(bins []Bin) {
+	tempBinList := BinList{
+		Bins: bins,
+	}
+
+	binList.Store.Save(json.MarshalIndent(tempBinList, "", "  "))
 }

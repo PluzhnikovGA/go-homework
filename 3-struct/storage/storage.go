@@ -31,6 +31,7 @@ func (db StorageDb) Read() (data []byte, err error) {
 }
 
 func (db StorageDb) Save(data []byte, err error) {
+	fmt.Println(string(data))
 	if err != nil {
 		fmt.Println("Failed to convert to JSON")
 		return
