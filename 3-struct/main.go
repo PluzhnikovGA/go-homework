@@ -1,21 +1,42 @@
 package main
 
 import (
+	"3-struct/bins"
 	"3-struct/storage"
+	"bufio"
 	"fmt"
+	"os"
+	"strings"
 )
 
 func main() {
-	data, _ := storage.ReadBins()
+	reader := bufio.NewReader(os.Stdin)
+	binList := bins.NewBinList(reader, storage.NewStorageDb("data.json"))
 
-	fmt.Print(data)
-	// reader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Print("Do you want to add new bin? (Y/n): ")
+		input, err := reader.ReadString('\n')
 
-	// var binList bins.BinList
-	// binList.NewListBin(reader)
+		if err != nil {
+			fmt.Println("Something went wrong.")
+			continue
+		}
 
-	// fmt.Println("\nCreated bins:")
-	// for _, bin := range binList.Bins {
-	// 	fmt.Printf("ID: %s, Name: %s, CreatedAt: %s Private: %t \n", bin.Id, bin.Name, bin.CreatedAt, bin.Private)
-	// }
+		switch strings.ToUpper(strings.TrimSpace(input)) {
+		case "Y", "":
+			binList.AddBin(reader)
+			data, err := binList.Store.Read()
+
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+
+			fmt.Println(string(data))
+		case "N":
+			fmt.Println("Good bye!")
+		default:
+			fmt.Println("You entered an incorrect value.")
+		}
+	}
 }
