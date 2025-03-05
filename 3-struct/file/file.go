@@ -10,12 +10,12 @@ func ReadFile(filename string) (data []byte, err error) {
 	return os.ReadFile(filename);
 }
 
-func WriteFile(content []byte, name string) {
+func WriteFile(content []byte, name string) (bool) {
 	file, err := os.Create(name)
 
 	if err != nil {
 		fmt.Println(err)
-		return
+		return false
 	}
 
 	defer file.Close()
@@ -24,10 +24,10 @@ func WriteFile(content []byte, name string) {
 
 	if err != nil {
 		fmt.Println("Error! Failed to write data")
-		return
+		return false
 	}
 
-	fmt.Println("Recording completed successfully!")
+	return true
 }
 
 func ValidationJSONExtension(name string) (isJson bool) {
