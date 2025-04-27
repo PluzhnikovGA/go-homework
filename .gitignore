@@ -1,6 +1,5 @@
-*/1-converter
-
 demo*
 *.json
 *.vault
 */.env*
+.vscode

@@ -9,7 +9,6 @@ type Config struct {
 func GetConfig() *Config {
 	key := os.Getenv("KEY")
 
-
 	if key == "" {
 		panic("You don't have KEY param")
 	}
